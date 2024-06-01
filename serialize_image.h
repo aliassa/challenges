@@ -23,4 +23,4 @@ typedef struct __attribute__((packed))
 } Image;
 
 void serialize_image_to_file(Image * img, char* filename);
-int deserialize_image_from_file(const char* filename, Image* des_image);
+int deserialize_image_from_file(FILE* file, Image* des_image);

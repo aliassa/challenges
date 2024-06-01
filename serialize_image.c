@@ -5,7 +5,7 @@ static void encrypt(char* data, size_t size)
 #ifndef CLEAR
     for(size_t i = 0; i < size; i++)
         data[i] ^= KEY;
-#endif        
+#endif // CLEAR
 }
 
 static void decrypt(char* data, size_t size)
@@ -33,7 +33,7 @@ void serialize_image_to_file(Image * img, char* filename)
 
     encrypt(memory, index);
 
-    FILE *file = fopen(filename, "wb");
+    FILE *file = fopen(filename, "ab"); // wb for not append
     if(file == NULL)
     {
         free(memory);
@@ -51,23 +51,18 @@ void serialize_image_to_file(Image * img, char* filename)
 }
 
 
-
-int deserialize_image_from_file(const char* filename, Image* des_image)
+// allocates memory for image name
+int deserialize_image_from_file(FILE* file, Image* des_image)
 {
-    FILE *file = fopen(filename, "rb");
-    if (file == NULL) {
-        perror("Error opening file");
-        return -1;
-    }
-
     // read header and length
+    long curr_seek = ftell(file);
     char h_len[6];
     fread(h_len, 6, 1, file);
     decrypt(h_len, 6);
     const uint32_t h = HEADER;
     if(memcmp(&h, h_len, 4) != 0)
     {
-        perror("Not an image!\n");
+        printf("Not an image , header : %08x!\n", *(uint32_t*)h_len);
         return -1;
     }
     memcpy(des_image, h_len, 4);
@@ -75,7 +70,8 @@ int deserialize_image_from_file(const char* filename, Image* des_image)
     des_image->name = (char*)malloc(des_image->name_len + 1);
     des_image->name[des_image->name_len] = '\0';
 
-    fseek(file, 6, SEEK_SET);
+    fseek(file, 6 + curr_seek, SEEK_SET);
+    printf(" 2 Current seek : %ld\n", ftell(file));
     char rest[des_image->name_len + 4 + 4]; // name + dims + shape_type
     char* p = rest;
     fread(rest, des_image->name_len + 4 + 4, 1, file);
@@ -86,6 +82,4 @@ int deserialize_image_from_file(const char* filename, Image* des_image)
     memcpy(&des_image->dimensions, p, 4);
     p += 4;
     memcpy(&des_image->type, p, 4);
-    
-    fclose(file);
 }

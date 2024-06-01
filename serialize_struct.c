@@ -5,6 +5,7 @@
 
 #define HEADER_SIZE 4
 #define HEADER 0x50505050
+#define KEY 0xA9
 
 typedef struct
 {
@@ -16,6 +17,17 @@ typedef struct
         uint16_t height;
     } dimensions;
 } Image;
+
+void encrypt(char* data, size_t size)
+{
+    for(size_t i = 0; i < size; i++)
+        data[i] ^= KEY;
+}
+
+void decrypt(char* data, size_t size)
+{
+    encrypt(data, size);
+}
 
 
 void serialize_image_to_file(Image * img, char* filename)
@@ -32,7 +44,8 @@ void serialize_image_to_file(Image * img, char* filename)
     memcpy(memory + index, img->name, img->name_len);
     index += img->name_len;
     memcpy(memory + index , &img->dimensions, 4);
-
+    index += 4;
+    encrypt(memory, index);
     printf("Raw object size is : %d\n", index);
 
      FILE *file = fopen(filename, "wb");
@@ -66,6 +79,7 @@ int deserialize_image_from_file(const char* filename, Image* des_image)
     // read header and length
     char h_len[6];
     fread(h_len, 6, 1, file);
+    decrypt(h_len, 6);
     printf("Read header : %08x\n", *(uint32_t*)h_len);
     const uint32_t h = HEADER;
     if(memcmp(&h, h_len, 4) != 0)
@@ -81,9 +95,9 @@ int deserialize_image_from_file(const char* filename, Image* des_image)
     fseek(file, 6, SEEK_SET);
     char rest[des_image->name_len + 4]; // name + dims
     fread(rest, des_image->name_len + 4, 1, file);
+    decrypt(rest, des_image->name_len + 4);
     memcpy(des_image->name, rest, des_image->name_len);
     memcpy(&des_image->dimensions, rest + des_image->name_len , 4);
-    // Close the file
     fclose(file);
 }
 

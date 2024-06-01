@@ -3,9 +3,6 @@
 #include "string.h"
 #include "stdlib.h"
 
-#define LINE_TO_DRAW 10
-
-
 
 void init_grid(uint16_t height, uint16_t width, Grid* grid)
 {
@@ -20,6 +17,21 @@ void init_grid(uint16_t height, uint16_t width, Grid* grid)
         }
     }
 }
+
+void draw_square(uint8_t origin, uint8_t side, Grid* grid)
+{
+    uint16_t top_left = (grid->height / 4 + 1) * grid->width + 1 + origin;
+    char* draw_ptr = &grid->grid[top_left];
+    for(uint16_t i = 0; i < side; i++)
+    {
+        for(uint16_t j = 0; j < grid->width; j++)
+        {
+            if((i == 0 || i == side -1) && (j <= side) || j==0 || j == side)
+                draw_ptr[i * grid->width + j] = '#';
+        }
+    }
+}
+
 
 void draw_grid(Grid* grid)
 {
@@ -47,9 +59,11 @@ void draw_text(Grid* grid, char* text, uint16_t len)
     }
 }
 
+
+
 void draw_line(uint8_t origin, uint8_t length,Grid* grid)
 {
-    uint16_t begin = LINE_TO_DRAW * grid->width + 1;
+    uint16_t begin = (grid->height / 2 + 1) * grid->width + 1 + origin;
     char* draw_ptr = &grid->grid[begin];
     for(uint16_t i = 0; i < length ; i++)
     {

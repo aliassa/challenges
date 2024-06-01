@@ -1,5 +1,5 @@
 #include <stdint.h>
-#define MAX_GRID_SIZE 1024
+#define MAX_GRID_SIZE 100000
 #define MAX_GRID_NAME 124
 #define TEXT_LINE 10
 typedef enum SHAPE

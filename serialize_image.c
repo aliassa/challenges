@@ -28,8 +28,8 @@ void serialize_image_to_file(Image * img, char* filename)
     index += img->name_len;
     memcpy(memory + index , &img->dimensions, 4);
     index += 4;
-    //memcpy(memory + index, &img->type, sizeof(SHAPE_TYPE));
-    //index += sizeof(SHAPE_TYPE);
+    memcpy(memory + index, &img->type, sizeof(SHAPE_TYPE));
+    index += sizeof(SHAPE_TYPE);
 
     encrypt(memory, index);
 
@@ -76,14 +76,16 @@ int deserialize_image_from_file(const char* filename, Image* des_image)
     des_image->name[des_image->name_len] = '\0';
 
     fseek(file, 6, SEEK_SET);
-    char rest[des_image->name_len + 4]; // name + dims + shape_type
+    char rest[des_image->name_len + 4 + 4]; // name + dims + shape_type
     char* p = rest;
-    fread(rest, des_image->name_len + 4, 1, file);
+    fread(rest, des_image->name_len + 4 + 4, 1, file);
 
-    decrypt(rest, des_image->name_len + 4);
+    decrypt(rest, des_image->name_len + 4 + 4);
     memcpy(des_image->name, p, des_image->name_len);
     p += des_image->name_len;
     memcpy(&des_image->dimensions, p, 4);
+    p += 4;
+    memcpy(&des_image->type, p, 4);
     
     fclose(file);
 }

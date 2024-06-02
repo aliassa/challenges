@@ -71,7 +71,8 @@ void start_server(int port) {
 
             // Echo the message back to the client
             send(new_socket, pbuffer, img_size, 0);
-            memset(pbuffer, 0, BUFFER_SIZE);
+            memset(buffer, 0, BUFFER_SIZE);
+            pbuffer = &buffer[0];
         }
 
         if (read_size == 0) {

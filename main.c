@@ -38,10 +38,11 @@ void draw_all_file()
     free(des_bird.name);
 }
 
-
+Grid grid;
 
 int main()
 {
+    init_grid(50, 30, &grid);
     start_server(8080);
     return 0;
 }

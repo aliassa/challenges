@@ -6,7 +6,7 @@
 #include "shapes.h"
 
 #define HEADER_SIZE 4
-#define HEADER 0x50505050
+#define HEADER 0x05050505
 #define KEY 0xA9
 #define FILENAME "image.bin"
 
@@ -22,5 +22,9 @@ typedef struct __attribute__((packed))
     SHAPE_TYPE type;
 } Image;
 
+void print_info(const Image img);
 void serialize_image_to_file(Image * img, char* filename);
+int serialize_image_to_buffer(Image * img, char** out);
 int deserialize_image_from_file(FILE* file, Image* des_image);
+int deserialize_image_from_buffer(char* buffer, Image* des_image);
+void init_image(Image* img);

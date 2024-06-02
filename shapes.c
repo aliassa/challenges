@@ -32,6 +32,8 @@ void draw_square(uint8_t origin, uint8_t side, Grid* grid)
     }
 }
 
+void draw_circle(uint8_t origin, uint8_t radius, Grid* grid)
+{ }
 
 void draw_grid(Grid* grid)
 {
@@ -69,5 +71,25 @@ void draw_line(uint8_t origin, uint8_t length,Grid* grid)
     {
         *draw_ptr = '-';
         draw_ptr++;
+    }
+}
+
+
+void draw_shape(enum SHAPE shape, Grid* grid)
+{
+    switch (shape)
+    {
+    case LINE:
+        draw_line(5, 10, grid);
+        break;
+    case SQUARE:
+        draw_square(5, 10, grid);
+        break;
+    case CIRCLE:
+        draw_circle(5, 10, grid);
+        break;
+    default:
+        printf("NOT SUPPRTED SHAPE!\n");
+        break;
     }
 }

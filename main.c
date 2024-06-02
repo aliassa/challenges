@@ -1,32 +1,30 @@
 #include "serialize_image.h"
+#include "tcp_server.h"
 
-
-
-void print_info(const Image img)
-{
-    printf("\nheader:%08x | name_len:%d | name:%s | width:%d | height:%d | type:%d\n",
-            *(uint32_t*)img.header, img.name_len,  img.name, img.dimensions.width, img.dimensions.height
-            , img.type);
-}
 
 int main()
 {
-    const uint32_t header = HEADER;
     printf("SIZEOF IMAGE : %ld\n", sizeof(Image));
-    Image bird = { 
-        .name_len = 19,
-        .name = "Ali and Ilyes Image",
-        .dimensions.width = 50,
-        .dimensions.height = 30,
-        .type = LINE
-         };
-    bird.header[0] = (header >> 24 ) &0xFF;
-    bird.header[1] = (header >> 16 ) &0xFF;
-    bird.header[2] = (header >> 8 ) &0xFF;
-    bird.header[3] = (header >> 0 ) &0xFF;
+    Image bird;
+    
+    bird.name = "Ali and Ilyes Image";
+    bird.name_len = strlen(bird.name);
+    bird.dimensions.width = 50;
+    bird.dimensions.height = 30;
+    bird.type  = SQUARE;
 
     serialize_image_to_file(&bird, FILENAME);
 
+    char* buff;
+    serialize_image_to_buffer(&bird, &buff);
+    start_server(8080);
+
+    //free(img.name);
+    //free(buff);
+
+
+    return 0;
+    
     Image des_bird;
     // To be factorized
     FILE *file = fopen(FILENAME, "rb");
@@ -35,7 +33,7 @@ int main()
         return -1;
     }
     Grid image;
-    init_grid(10, 30, &image);
+    init_grid(40, 40, &image);
     Image images[10];
     uint32_t seek = 0;
     int res = 0;
@@ -52,6 +50,7 @@ int main()
 
         print_info(images[i]);
         draw_text(&image, images[i].name, images[i].name_len);
+        draw_shape(images[i].type, &image);
         draw_grid(&image);
     }
 

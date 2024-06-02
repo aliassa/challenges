@@ -2,35 +2,15 @@
 #include "tcp_server.h"
 
 
-int main()
+
+void draw_all_file()
 {
-    printf("SIZEOF IMAGE : %ld\n", sizeof(Image));
-    Image bird;
-    
-    bird.name = "Ali and Ilyes Image";
-    bird.name_len = strlen(bird.name);
-    bird.dimensions.width = 50;
-    bird.dimensions.height = 30;
-    bird.type  = SQUARE;
-
-    serialize_image_to_file(&bird, FILENAME);
-
-    char* buff;
-    serialize_image_to_buffer(&bird, &buff);
-    start_server(8080);
-
-    //free(img.name);
-    //free(buff);
-
-
-    return 0;
-    
     Image des_bird;
     // To be factorized
     FILE *file = fopen(FILENAME, "rb");
     if (file == NULL) {
         perror("Error opening file");
-        return -1;
+        return;
     }
     Grid image;
     init_grid(40, 40, &image);
@@ -40,7 +20,7 @@ int main()
     for(int i = 0; i < 10 ; i++)
     {
         res = deserialize_image_from_file(file, images + i);
-        if(res == -1) return -1;
+        if(res == -1) return;
         seek += sizeof(Image) - sizeof(char*) + images[i].name_len;
         if(fseek(file, seek, SEEK_SET) != 0)
         {
@@ -56,6 +36,12 @@ int main()
 
     fclose(file);
     free(des_bird.name);
+}
 
+
+
+int main()
+{
+    start_server(8080);
     return 0;
 }

@@ -63,6 +63,11 @@ void start_server(int port) {
         while ((read_size = read(new_socket, pbuffer, BUFFER_SIZE)) > 0) {
             deserialize_image_from_buffer(pbuffer, &rv_image);
             print_info(rv_image);
+            Grid grid;
+
+            draw_text(&grid, rv_image.name, rv_image.name_len);
+            draw_shape(rv_image.type, &grid);
+            draw_grid(&grid);
 
             rv_image.dimensions.width += 12;
             printf("\n Image to send to client : \n");

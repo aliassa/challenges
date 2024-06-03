@@ -11,14 +11,14 @@ extern Grid main_grid;
 
 void clear_screen() {
     // ANSI escape sequence to clear screen and move cursor to top-left corner
-    init_grid(&main_grid);
+    //init_grid(&main_grid);
     printf("\033[H\033[J");
     fflush(stdout); // Ensure the command is sent to the terminal immediately
 }
 
 void draw(Image* rv_image,char* pbuffer)
 {
-    clear_screen();
+    //clear_screen();
     deserialize_image_from_buffer(pbuffer, rv_image);
     print_info(*rv_image);
 
@@ -83,12 +83,12 @@ void start_server(int port) {
         Image rv_image;
         while ((read_size = read(new_socket, pbuffer, BUFFER_SIZE)) > 0) {
             draw(&rv_image, pbuffer);
-
-            rv_image.dimensions.width += 12;
+            find_line(&main_grid);
+            /*rv_image.dimensions.width += 12;
             int img_size = serialize_image_to_buffer(&rv_image, &pbuffer);
 
             // Echo the message back to the client
-            send(new_socket, pbuffer, img_size, 0);
+            send(new_socket, pbuffer, img_size, 0);*/
             memset(buffer, 0, BUFFER_SIZE);
             pbuffer = &buffer[0];
         }

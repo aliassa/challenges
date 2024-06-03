@@ -1,7 +1,10 @@
 #include "serialize_image.h"
 #include "tcp_server.h"
+#define MAX_SHAPES 125
 
 Grid main_grid;
+ShapeHeader* shapes[MAX_SHAPES]; // initialized to null!
+uint16_t shape_count;
 
 void draw_all_file()
 {
@@ -42,6 +45,8 @@ void draw_all_file()
 int main()
 {
     init_grid(&main_grid);
+    draw_text(&main_grid, "Main Grid Window", 16);
+    draw_grid(&main_grid);
     start_server(8080);
     return 0;
 }

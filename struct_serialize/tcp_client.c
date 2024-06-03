@@ -72,11 +72,14 @@ int main(int ac, char* av[]) {
     send(sock, img, img_size, 0);
 
     // Receive message from server
-    int valread = read(sock, buffer, BUFFER_SIZE);
+    // For now server doesn't respond!
+    // TODO
+    // get info abouts shapes!
+    /*int valread = read(sock, buffer, BUFFER_SIZE);
     Image rv_image;
     deserialize_image_from_buffer(buffer, &rv_image);
     printf("From SERVER : \n");
-    print_info(rv_image);
+    print_info(rv_image);*/
 
     // Close the socket
     close(sock);

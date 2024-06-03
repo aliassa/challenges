@@ -7,13 +7,26 @@
 
 #define BUFFER_SIZE 1024
 
-extern Grid grid;
+extern Grid main_grid;
 
 void clear_screen() {
     // ANSI escape sequence to clear screen and move cursor to top-left corner
+    init_grid(&main_grid);
     printf("\033[H\033[J");
     fflush(stdout); // Ensure the command is sent to the terminal immediately
 }
+
+void draw(Image* rv_image,char* pbuffer)
+{
+    clear_screen();
+    deserialize_image_from_buffer(pbuffer, rv_image);
+    print_info(*rv_image);
+
+    draw_text(&main_grid, rv_image->name, rv_image->name_len);
+    draw_shape(rv_image->type, &main_grid);
+    draw_grid(&main_grid);
+}
+
 
 void start_server(int port) {
     int server_fd, new_socket;
@@ -69,17 +82,9 @@ void start_server(int port) {
         int read_size;
         Image rv_image;
         while ((read_size = read(new_socket, pbuffer, BUFFER_SIZE)) > 0) {
-            clear_screen();
-            deserialize_image_from_buffer(pbuffer, &rv_image);
-            print_info(rv_image);
-
-            draw_text(&grid, rv_image.name, rv_image.name_len);
-            draw_shape(rv_image.type, &grid);
-            draw_grid(&grid);
+            draw(&rv_image, pbuffer);
 
             rv_image.dimensions.width += 12;
-            printf("\n Image to send to client : \n");
-            print_info(rv_image);
             int img_size = serialize_image_to_buffer(&rv_image, &pbuffer);
 
             // Echo the message back to the client

@@ -1,7 +1,7 @@
 #include "serialize_image.h"
 #include "tcp_server.h"
 
-
+Grid main_grid;
 
 void draw_all_file()
 {
@@ -13,7 +13,7 @@ void draw_all_file()
         return;
     }
     Grid image;
-    init_grid(40, 40, &image);
+    init_grid(&image);
     Image images[10];
     uint32_t seek = 0;
     int res = 0;
@@ -38,11 +38,10 @@ void draw_all_file()
     free(des_bird.name);
 }
 
-Grid grid;
 
 int main()
 {
-    init_grid(50, 30, &grid);
+    init_grid(&main_grid);
     start_server(8080);
     return 0;
 }

@@ -4,15 +4,15 @@
 #include "stdlib.h"
 
 
-void init_grid(uint16_t height, uint16_t width, Grid* grid)
+void init_grid(Grid* grid)
 {
-    memset(grid->grid, ' ', height * width);
-    grid->height = height;
-    grid->width = width;
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            if (i == 0 || i == height - 1 || j == 0 || j == width - 1) {
-                grid->grid[i * width + j] = '#';
+    memset(grid->grid, ' ', GRID_HEIGHT * GRID_WIDTH);
+    grid->height = GRID_HEIGHT;
+    grid->width = GRID_WIDTH;
+    for (int i = 0; i < GRID_HEIGHT; i++) {
+        for (int j = 0; j < GRID_WIDTH; j++) {
+            if (i == 0 || i == GRID_HEIGHT - 1 || j == 0 || j == GRID_WIDTH - 1) {
+                grid->grid[i * GRID_WIDTH + j] = '#';
             }
         }
     }

@@ -21,7 +21,6 @@ void draw(Image* rv_image,char* pbuffer)
     //clear_screen();
     deserialize_image_from_buffer(pbuffer, rv_image);
     print_info(*rv_image);
-
     draw_text(&main_grid, rv_image->name, rv_image->name_len);
     draw_shape(rv_image->type, &main_grid);
     draw_grid(&main_grid);
@@ -88,6 +87,7 @@ void start_server() {
 
             // Echo the message back to the client
             send(new_socket, pbuffer, img_size, 0);*/
+            delete_shape_by_id(&main_grid, rv_image.dimensions.width);
             memset(buffer, 0, BUFFER_SIZE);
             pbuffer = &buffer[0];
         }

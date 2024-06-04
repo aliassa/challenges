@@ -36,7 +36,7 @@ int main(int ac, char* av[]) {
     bird.name = (char*)malloc(strlen(img_name) + 1);
     strcpy(bird.name, img_name);
     bird.name_len = strlen(bird.name);
-    bird.dimensions.width = 50;
+    bird.dimensions.width = 2;
     bird.dimensions.height = 30;
     bird.type  = SQUARE;
 

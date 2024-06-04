@@ -76,3 +76,4 @@ void find_shapes(Grid* grid);
 void hide_lines(Grid* grid);
 void draw_label(ShapeHeader* s, uint16_t index, const char* text, Grid* grid);
 void update_shapes(Grid* grid);
+void delete_shape_by_id(Grid* grid, int id);

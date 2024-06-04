@@ -119,7 +119,6 @@ ShapeHeader* draw_square(uint8_t origin_x, uint8_t origin_y, uint8_t side, Grid*
     square->header.is_head = 1;
     int label_index = index + (grid->width * side)/2;
     draw_label((ShapeHeader*) square, label_index, "-Label : Square ", grid);
-    printf("");
     return (ShapeHeader*) square;
 }
 
@@ -240,7 +239,11 @@ void draw_text(Grid* grid, char* text, uint16_t len)
 {
     uint16_t text_line = 3;
     uint16_t text_start = (grid->width - len)/2;
-
+    // clean old text
+    for(int i = text_line * grid->width + 1; i < text_line * grid->width + grid->width - 1; i++)
+    {
+        grid->grid[i]->pixel = ' ';
+    }
     uint16_t begin = text_line * grid->width + text_start;
     for(uint16_t i = 0; i < len ; i++)
     {
@@ -345,3 +348,17 @@ void update_shapes(Grid* grid)
     }
 }
 
+void delete_shape_by_id(Grid* grid, int id)
+{
+    for(int i = 0 ; i < grid->height; i++)
+    {
+        for(int j = 0; j < grid->width ; j++)
+        {
+            ShapeHeader* shape = grid->grid[i * grid->width + j];
+            if(id == shape->id)
+            {
+                reset_shape(grid, shape);
+            }
+        }
+    }
+}

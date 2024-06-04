@@ -24,7 +24,7 @@ typedef struct
 
 
 typedef struct {
-    ShapeHeader* header;
+    ShapeHeader header;
     uint16_t length;
 }Line;
 

@@ -14,16 +14,6 @@ typedef struct
     int b;
 }Line;
 
-void print_shape(Shape* s)
-{
-    printf("[SHAPE] : a=%d\n", s->a);
-}
-void print_line(Line* l)
-{
-    printf("[LINE] : b=%d ", l->b);
-    printf("Has shape : ");
-    print_shape(l->shape);
-}
 
 int main()
 {
@@ -36,11 +26,17 @@ int main()
     Shape* sp = (Shape*) malloc(sizeof(Shape));
     sp->a = 0;
 
-    //print_line(line);
-    //print_shape(sp);
-    // make sp a Line!
-
     sp = (Shape*)line;
-    print_line((Line*)sp);
+    printf("%d\n", ((Line*)sp)->b);
 
+}
+void print_shape(Shape* s)
+{
+    printf("[SHAPE] : a=%d\n", s->a);
+}
+void print_line(Line* l)
+{
+    printf("[LINE] : b=%d ", l->b);
+    printf("Has shape : ");
+    print_shape(l->shape);
 }

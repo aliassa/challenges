@@ -91,6 +91,7 @@ void find_line(Grid *grid)
             }
         }
     }
+
 }
 
 //void draw_circle(uint8_t origin, uint8_t radius, Grid* grid)
@@ -134,24 +135,22 @@ void draw_text(Grid* grid, char* text, uint16_t len)
     }
 }
 
-
-
 void draw_line(uint8_t origin_x, uint8_t origin_y, uint8_t length, Grid* grid) {
     uint16_t index = (origin_y * grid->width) + origin_x;
     // Create a line
     free(grid->grid[index]);
     Line* line = (Line*) malloc(sizeof(Line));
-    line->header = (ShapeHeader*) malloc(sizeof(ShapeHeader));
-    line->header->type = LINE;
-    line->header->pixel = PIXEL;
-    
+    line->header.type = LINE;
+    line->header.pixel = PIXEL;
+    line->length = length;
+    grid->grid[index] = (ShapeHeader*)line;
     for(uint16_t i = 0; i < length ; i++) {
         if ((origin_x + i) < grid->width) {
-            grid->grid[index + i] = line->header;
+            grid->grid[index + i]->pixel = PIXEL;
         }
     }
+    add_shape(grid->grid[index]);
 }
-
 
 void draw_shape(enum SHAPE shape, Grid* grid)
 {

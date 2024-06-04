@@ -84,9 +84,11 @@ ShapeHeader* draw_square(uint8_t origin_x, uint8_t origin_y, uint8_t side, Grid*
                 grid->grid[adjusted_y * grid->width + origin_x + x]->pixel = PIXEL;
                 grid->grid[adjusted_y * grid->width + origin_x + x]->type = SQUARE;
                 grid->grid[adjusted_y * grid->width + origin_x + x]->id = shape_id;
+                grid->grid[adjusted_y * grid->width + origin_x + x]->is_head = 0;
             }
         }
     }
+    square->header.is_head = 1;
     int label_index = index + (grid->width * side)/2;
     draw_label((ShapeHeader*) square, label_index, "-Label : Square ", grid);
     return (ShapeHeader*) square;
@@ -153,8 +155,10 @@ void draw_label(ShapeHeader* s, uint16_t index, const char *text, Grid *grid)
             grid->grid[index + i]->pixel = label->text[i];
             grid->grid[index + i]->type = LABEL;
             grid->grid[index + i]->id = shape_id;
+            grid->grid[index + i]->is_head = 0;
         }
     }
+    label->header.is_head = 1;
     s->label = label; // Affect label to shape
 }
 
@@ -179,10 +183,11 @@ ShapeHeader* draw_circle(uint8_t origin_x, uint8_t origin_y, uint8_t radius, Gri
                 grid->grid[y * grid->width + x]->pixel = PIXEL;
                 grid->grid[y * grid->width + x]->type = CIRCLE;
                 grid->grid[y * grid->width + x]->id = shape_id;
+                grid->grid[y * grid->width + x]->is_head = 0;
             }
         }
     }
-
+    circle->header.is_head = 1;
     draw_label((ShapeHeader*)circle, index + grid->width + (radius * grid->width/aspect_ratio), "-Label : Circle", grid);
     return (ShapeHeader*)circle;
 }
@@ -263,8 +268,10 @@ ShapeHeader* draw_line(uint8_t origin_x, uint8_t origin_y, uint8_t length, Grid*
             grid->grid[index + i]->pixel = PIXEL;
             grid->grid[index + i]->type = LINE;
             grid->grid[index + i]->id = shape_id;
+            grid->grid[index + i]->is_head = 0;
         }
     }
+    line->header.is_head = 1;
     draw_label((ShapeHeader*)line, index + grid->width,"-Label : Line", grid);
     return (ShapeHeader*)line;
 }
@@ -299,16 +306,24 @@ void draw_shape(enum SHAPE shape, Grid* grid)
 
 void update_shapes(Grid* grid)
 {
+    ShapeHeader* sp = NULL;
+    int index = 0;
     for(int i = 0 ; i < grid->height; i++)
     {
         for(int j = 0; j < grid->width ; j++)
         {
             ShapeHeader* shape = grid->grid[i * grid->width + j];
-            if(shape->type == LABEL)
+            if(shape->type == CIRCLE && shape->label &&  shape->is_head)
             {                
+                sprintf(shape->label->text, "%d  ", i);
+                printf("Circle label : %s\n", shape->label->text);
+                sp = shape;
+                index = i * grid->width + j;
             }
         }
     }
+    //if(sp)
+        //draw_label(sp, index,"Bla blaa", grid);
 }
 
 /*

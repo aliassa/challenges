@@ -29,6 +29,7 @@ typedef struct
     SHAPE_TYPE type;
     Label* label;
     int id;
+    uint8_t is_head;
 } ShapeHeader;
 
 struct Label

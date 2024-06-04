@@ -58,6 +58,12 @@ static void add_shape(ShapeHeader* shape)
 
 void draw_square(uint8_t origin_x, uint8_t origin_y, uint8_t side, Grid* grid) {
     float aspect_ratio = 1.6;  // Adjust this value based on your terminal's aspect ratio
+    uint16_t index = origin_y * grid->width + origin_x;
+    free(grid->grid[index]);
+    Square* square = (Square*)malloc(sizeof(Square));
+    square->side = side;
+    square->header.type = SQUARE;
+    grid->grid[index] = (ShapeHeader*) square;
 
     for (int y = 0; y < side; y++) {
         for (int x = 0; x < side; x++) {
@@ -67,13 +73,12 @@ void draw_square(uint8_t origin_x, uint8_t origin_y, uint8_t side, Grid* grid) {
             }
         }
     }
+    int label_index = index + (grid->width * side)/2;
+    draw_label(label_index, "-Label : Square ", grid);
 }
 
-void find_line(Grid *grid)
+void find_shapes(Grid *grid)
 {
-    // search for shapes
-    // Now we support lines only
-    uint16_t count = 0;
     for(int i = 0; i < grid->height ; i++)
     {
         for(int j = 0; j < grid->width; j++)
@@ -81,25 +86,70 @@ void find_line(Grid *grid)
             ShapeHeader* shape = grid->grid[i * grid->width + j];
             if(shape->type == LINE)
             {
-                //Line* line = (Line*)((char*)shape - offsetof(Line, header));
-                //Line* line = (Line*) shape;
-                printf("===========================================\n");
-                printf("Found a line with width : %d At : %d, %d\n", ((Line*)shape)->length, j, i);
-                printf("===========================================\n");
-                break; // TODO see if we can search multiple lines in same grid line
-                // use legth for that!
+                printf("[Line] Length : %d - Coordenates : (x=%d , y=%d)\n", ((Line*)shape)->length, j, i);
+                j += ((Line*)shape)->length;
+            }
+            else if(shape->type == CIRCLE)
+            {
+                printf("[Circle] Radius : %d - Coordenates : (x=%d , y=%d)\n", ((Circle*)shape)->radius, j, i);
+                j += ((Circle*)shape)->radius;
+            }
+            else if(shape->type == SQUARE)
+            {
+                printf("[Square] Side : %d - Coordenates : (x=%d , y=%d)\n", ((Square*)shape)->side, j, i);
+                j += ((Square*)shape)->side;
             }
         }
     }
 
 }
 
-//void draw_circle(uint8_t origin, uint8_t radius, Grid* grid)
+void hide_lines(Grid *grid)
+{
+    for(int i = 0; i < grid->height ; i++)
+    {
+        for(int j = 0; j < grid->width; j++)
+        {
+            ShapeHeader* shape = grid->grid[i * grid->width + j];
+            if(shape->type == LINE)
+            {
+                shape->pixel = 'h';
+            }
+        }
+    }
+}
+
+void draw_label(uint16_t index, const char *text, Grid *grid)
+{
+    if(index >= grid->height * grid->width)
+    {
+        printf("Label outside grid\n");
+        return;
+    }
+    grid->grid[index]->label = (Label*) malloc(sizeof(Label));
+    strcpy(grid->grid[index]->label->text, text);
+    grid->grid[index]->type = LABEL;
+    for(int i = 0; i < strlen(grid->grid[index]->label->text); i++) {
+        if (index + i < MAX_GRID_SIZE && (index % grid->width) + i < grid->width) {
+            grid->grid[index + i]->pixel = grid->grid[index]->label->text[i];
+        }
+    }
+}
+
 void draw_circle(uint8_t origin_x, uint8_t origin_y, uint8_t radius, Grid* grid) {
     float aspect_ratio = 2.0;  // Adjust this value based on your terminal's aspect ratio
-
-    for (int y = 0; y < grid->height; y++) {
-        for (int x = 0; x < grid->width; x++) {
+    
+    // Create a circle
+    uint16_t index = origin_y * grid->width + origin_x;
+    free(grid->grid[index]);
+    Circle* circle = (Circle*) malloc(sizeof(Circle));
+    circle->header.type = CIRCLE;
+    circle->radius = radius;
+    grid->grid[index] = (ShapeHeader*)circle;
+    uint16_t in = 0;
+    int x = 0, y = 0;
+    for (y = 0; y < grid->height; y++) {
+        for (x = 0; x < grid->width; x++) {
             float dx = x - origin_x;
             float dy = (y - origin_y) * aspect_ratio;
             if (dx * dx + dy * dy <= radius * radius) {
@@ -107,6 +157,8 @@ void draw_circle(uint8_t origin_x, uint8_t origin_y, uint8_t radius, Grid* grid)
             }
         }
     }
+
+    draw_label(index + grid->width + (radius * grid->width/aspect_ratio), "-Label : Circle", grid);
 }
 
 void draw_grid(Grid* grid)
@@ -115,7 +167,10 @@ void draw_grid(Grid* grid)
     {
         for(int j = 0; j < grid->width; j++)
         {
-            printf("%c",grid->grid[i * grid->width + j]->pixel);
+            if(HIDDEN != grid->grid[i * grid->width + j]->pixel)
+                printf("%c",grid->grid[i * grid->width + j]->pixel);
+            else
+                printf(" ");
         }
         printf("\n");
     }
@@ -143,13 +198,15 @@ void draw_line(uint8_t origin_x, uint8_t origin_y, uint8_t length, Grid* grid) {
     line->header.type = LINE;
     line->header.pixel = PIXEL;
     line->length = length;
+    // Polymorphisme here
     grid->grid[index] = (ShapeHeader*)line;
     for(uint16_t i = 0; i < length ; i++) {
         if ((origin_x + i) < grid->width) {
             grid->grid[index + i]->pixel = PIXEL;
+            grid->grid[index + i]->type = LINE;
         }
     }
-    add_shape(grid->grid[index]);
+    draw_label(index + grid->width,"-Label : Line", grid);
 }
 
 void draw_shape(enum SHAPE shape, Grid* grid)
@@ -158,12 +215,11 @@ void draw_shape(enum SHAPE shape, Grid* grid)
     {
     case LINE:
         draw_line(30, 5, 30, grid);
-        draw_line(35, 10, 50, grid);
-        draw_circle(65, 25, 20, grid);
-        draw_square(10, 25, 20, grid);
+        draw_square(10, 25, 10, grid);
+        draw_circle(65, 25, 10, grid);
         break;
     case SQUARE:
-        draw_square(10, 25, 10, grid);
+        draw_square(10, 30, 10, grid);
         break;
     case CIRCLE:
         draw_circle(65, 25, 10, grid);

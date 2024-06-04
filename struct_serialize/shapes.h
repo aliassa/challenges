@@ -5,6 +5,8 @@
 #define GRID_WIDTH 100
 #define GRID_HEIGHT 50
 #define PIXEL '*'
+#define HIDDEN 'h'
+
 typedef enum SHAPE
 {
     SHAPE_TYPE_UNKNOWN, // pixel == ' ' initial value
@@ -12,33 +14,38 @@ typedef enum SHAPE
     CIRCLE,
     SQUARE,
     BORDER,
+    LABEL,
     COUNT
 }SHAPE_TYPE;
+
+typedef struct Label Label;
 
 typedef struct
 {
     char pixel;
     SHAPE_TYPE type;
+    Label* label;
 } ShapeHeader;
 
-
-
+struct Label
+{
+    ShapeHeader header;
+    char text[16];
+};
 typedef struct {
     ShapeHeader header;
     uint16_t length;
 }Line;
 
 typedef struct {
-    ShapeHeader* header;
+    ShapeHeader header;
     uint16_t side;
 }Square;
 
 typedef struct {
-    ShapeHeader* header;
+    ShapeHeader header;
     uint16_t radius;
 }Circle;
-
-
 
 typedef struct 
 {
@@ -56,4 +63,6 @@ void draw_shape(enum SHAPE shape, Grid* grid); // depending on type enum call ap
 void draw_line(uint8_t origin_x, uint8_t origin_y, uint8_t length, Grid* grid);
 void draw_circle(uint8_t origin_x, uint8_t origin_y, uint8_t radius, Grid* grid);
 void draw_square(uint8_t origin_x, uint8_t origin_y, uint8_t side, Grid* grid);
-void find_line(Grid* grid);
+void find_shapes(Grid* grid);
+void hide_lines(Grid* grid);
+void draw_label(uint16_t index, const char* text, Grid* grid);

@@ -38,7 +38,7 @@ int main(int ac, char* av[]) {
     bird.name_len = strlen(bird.name);
     bird.dimensions.width = 50;
     bird.dimensions.height = 30;
-    bird.type  = LINE;
+    bird.type  = SQUARE;
 
     char *img;
     int img_size = serialize_image_to_buffer(&bird, &img);

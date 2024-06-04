@@ -83,7 +83,6 @@ void start_server(int port) {
         Image rv_image;
         while ((read_size = read(new_socket, pbuffer, BUFFER_SIZE)) > 0) {
             draw(&rv_image, pbuffer);
-            find_line(&main_grid);
             /*rv_image.dimensions.width += 12;
             int img_size = serialize_image_to_buffer(&rv_image, &pbuffer);
 

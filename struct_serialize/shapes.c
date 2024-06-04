@@ -1,4 +1,6 @@
 #include "shapes.h"
+#include "colors.h"
+
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h"
@@ -9,6 +11,7 @@
 extern ShapeHeader* shapes[MAX_SHAPES];
 extern uint16_t shape_count;
 extern int shape_id;
+
 
 static void reset_shape(Grid* grid, ShapeHeader* shape)
 {
@@ -184,8 +187,36 @@ void draw_grid(Grid* grid)
     {
         for(int j = 0; j < grid->width; j++)
         {
-            if(HIDDEN != grid->grid[i * grid->width + j]->pixel)
-                printf("%c",grid->grid[i * grid->width + j]->pixel);
+            ShapeHeader* shape = grid->grid[i * grid->width + j]; 
+            if(HIDDEN != shape->pixel)
+            {
+                if(shape->type == BORDER)
+                {
+                    printf(ANSI_COLOR_RED);
+                }
+                else if(shape->type == LABEL)
+                {
+                    printf(ANSI_COLOR_YELLOW);
+                }
+                else if(shape->type == LINE)
+                {
+                    printf(ANSI_COLOR_CYAN);
+                }
+                else if(shape->type == SQUARE)
+                {
+                    printf(ANSI_COLOR_GREEN);
+                }
+                else if(shape->type == CIRCLE)
+                {
+                    printf(ANSI_COLOR_MAGENTA);
+                }
+                else
+                {
+                    printf(ANSI_COLOR_RESET);
+                }
+                printf("%c",shape->pixel);
+
+            }
             else
                 printf(" ");
         }
@@ -278,7 +309,7 @@ void update_shapes(Grid* grid)
             )
             {
 
-                reset_shape(grid, shape);
+                //reset_shape(grid, shape);
                 done = 1;
             }
         }

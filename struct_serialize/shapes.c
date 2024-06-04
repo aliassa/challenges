@@ -83,6 +83,7 @@ ShapeHeader* draw_square(uint8_t origin_x, uint8_t origin_y, uint8_t side, Grid*
             if (adjusted_y < grid->height && (origin_x + x) < grid->width) {
                 grid->grid[adjusted_y * grid->width + origin_x + x]->pixel = PIXEL;
                 grid->grid[adjusted_y * grid->width + origin_x + x]->type = SQUARE;
+                grid->grid[adjusted_y * grid->width + origin_x + x]->id = shape_id;
             }
         }
     }
@@ -141,16 +142,20 @@ void draw_label(ShapeHeader* s, uint16_t index, const char *text, Grid *grid)
         printf("Label outside grid\n");
         return;
     }
-    grid->grid[index]->label = (Label*) malloc(sizeof(Label));
-    strcpy(grid->grid[index]->label->text, text);
-    grid->grid[index]->type = LABEL;
-    for(int i = 0; i < strlen(grid->grid[index]->label->text); i++) {
+    free(grid->grid[index]);
+    Label* label = (Label*) malloc(sizeof(Label));
+    strcpy(label->text, text);
+    label->header.type = LABEL;
+    label->header.id = ++shape_id;
+    grid->grid[index] = (ShapeHeader*)label;
+    for(int i = 0; i < strlen(label->text); i++) {
         if (index + i < MAX_GRID_SIZE && (index % grid->width) + i < grid->width) {
-            grid->grid[index + i]->pixel = grid->grid[index]->label->text[i];
+            grid->grid[index + i]->pixel = label->text[i];
             grid->grid[index + i]->type = LABEL;
+            grid->grid[index + i]->id = shape_id;
         }
     }
-    s->label = grid->grid[index]->label; // Affect label to shape
+    s->label = label; // Affect label to shape
 }
 
 ShapeHeader* draw_circle(uint8_t origin_x, uint8_t origin_y, uint8_t radius, Grid* grid) {
@@ -173,6 +178,7 @@ ShapeHeader* draw_circle(uint8_t origin_x, uint8_t origin_y, uint8_t radius, Gri
             if (dx * dx + dy * dy <= radius * radius) {
                 grid->grid[y * grid->width + x]->pixel = PIXEL;
                 grid->grid[y * grid->width + x]->type = CIRCLE;
+                grid->grid[y * grid->width + x]->id = shape_id;
             }
         }
     }
@@ -256,6 +262,7 @@ ShapeHeader* draw_line(uint8_t origin_x, uint8_t origin_y, uint8_t length, Grid*
         if ((origin_x + i) < grid->width) {
             grid->grid[index + i]->pixel = PIXEL;
             grid->grid[index + i]->type = LINE;
+            grid->grid[index + i]->id = shape_id;
         }
     }
     draw_label((ShapeHeader*)line, index + grid->width,"-Label : Line", grid);
@@ -289,9 +296,28 @@ void draw_shape(enum SHAPE shape, Grid* grid)
     }
 }
 
+
 void update_shapes(Grid* grid)
 {
-    int done = 0;
+    for(int i = 0 ; i < grid->height; i++)
+    {
+        for(int j = 0; j < grid->width ; j++)
+        {
+            ShapeHeader* shape = grid->grid[i * grid->width + j];
+            if(shape->type == LABEL)
+            {                
+            }
+        }
+    }
+}
+
+/*
+void update_shapes(Grid* grid)
+{
+    static int id = -1;
+    int current_id = -1;
+    SHAPE_TYPE type = SQUARE;
+
     ShapeHeader* new_grid[MAX_GRID_SIZE];
     for (int i = 0; i < grid->height * grid->width; i++) {
         new_grid[i] = NULL;
@@ -301,20 +327,17 @@ void update_shapes(Grid* grid)
         for(int j = 0; j < grid->width ; j++)
         {
             ShapeHeader* shape = grid->grid[i * grid->width + j];
-            if(
-                shape->type == LINE ||
-                shape->type == CIRCLE ||
-                shape->type == LABEL ||
-                shape->type == SQUARE
-            )
+            if(id == -1 && shape->type == type)
             {
-
-                //reset_shape(grid, shape);
-                done = 1;
+                id = shape->id;
+                printf("We delete square id = %d\n", id);
+            }
+            current_id = shape->id;
+            if(id != -1 && shape->type == type && current_id == id)
+            {
+                reset_shape(grid, shape);                
             }
         }
-        if(done) break;
-
     }
-}
+}*/
 

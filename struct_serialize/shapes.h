@@ -12,13 +12,13 @@
 
 typedef enum SHAPE
 {
-    SHAPE_TYPE_UNKNOWN, // pixel == ' ' initial value
-    LINE,
-    CIRCLE,
-    SQUARE,
-    BORDER,
-    LABEL,
-    COUNT
+    SHAPE_TYPE_UNKNOWN, // pixel == ' ' initial value //0
+    LINE, // 1
+    CIRCLE, // 2
+    SQUARE, // 3
+    BORDER, // 4
+    LABEL, // 5
+    COUNT // 6
 }SHAPE_TYPE;
 
 typedef struct Label Label;

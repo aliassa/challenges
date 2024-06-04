@@ -3,9 +3,10 @@
 #include <unistd.h> // For sleep
 
 #define MAX_SHAPES 125
-#define FRAME_RATE 3
+#define FRAME_RATE 50
 
 Grid main_grid;
+extern void clear_screen();
 
 ShapeHeader* shapes[MAX_SHAPES]; // initialized to null!
 uint16_t shape_count;
@@ -54,15 +55,15 @@ int main()
 {
     init_grid(&main_grid);
     draw_text(&main_grid, "Main Grid Window", 16);
-    ShapeHeader* sq1 = draw_square(5, 5, 10, &main_grid);
-    ShapeHeader* sq2 = draw_square(25, 5, 10, &main_grid);
-    ShapeHeader* sq3 = draw_square(45, 5, 10, &main_grid);
-    ShapeHeader* sq4 = draw_square(65, 5, 10, &main_grid);
+    ShapeHeader* sq1 = draw_square(5, 5, 12, &main_grid);
+    ShapeHeader* sq2 = draw_square(25, 5, 12, &main_grid);
+    ShapeHeader* sq3 = draw_square(45, 5, 12, &main_grid);
+    ShapeHeader* sq4 = draw_square(65, 5, 12, &main_grid);
 
-    ShapeHeader* l1 = draw_line(5, 15, 10, &main_grid);
-    ShapeHeader* l2 = draw_line(25, 15, 10, &main_grid);
-    ShapeHeader* l3 = draw_line(45, 15, 10, &main_grid);
-    ShapeHeader* l4 = draw_line(65, 15, 10, &main_grid);
+    ShapeHeader* l1 = draw_line(5, 15, 15, &main_grid);
+    ShapeHeader* l2 = draw_line(25, 15, 15, &main_grid);
+    ShapeHeader* l3 = draw_line(45, 15, 15, &main_grid);
+    ShapeHeader* l4 = draw_line(65, 15, 15, &main_grid);
 
     ShapeHeader* c1 = draw_circle(12, 25, 10, &main_grid);
     ShapeHeader* c2 = draw_circle(32, 25, 10, &main_grid);

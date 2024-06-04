@@ -28,7 +28,7 @@ void draw(Image* rv_image,char* pbuffer)
 }
 
 
-void start_server(int port) {
+void start_server() {
     int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1;
@@ -50,7 +50,7 @@ void start_server(int port) {
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(port);
+    address.sin_port = htons(8080);
 
     // Binding the socket to the network address and port
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
@@ -67,7 +67,7 @@ void start_server(int port) {
     }
 
     while (1) {
-        printf("Waiting for connections on port %d...\n", port);
+        printf("Waiting for connections on port 8080...\n");
 
         // Accept a new connection
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {

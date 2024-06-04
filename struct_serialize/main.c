@@ -1,6 +1,8 @@
 #include "serialize_image.h"
 #include "tcp_server.h"
 #include <unistd.h> // For sleep
+#include <pthread.h>
+#include <string.h>
 
 #define MAX_SHAPES 125
 #define FRAME_RATE 50
@@ -53,6 +55,7 @@ void draw_all_file()
 
 int main()
 {
+    pthread_t server_thread;
     init_grid(&main_grid);
     draw_text(&main_grid, "Main Grid Window", 16);
     ShapeHeader* sq1 = draw_square(5, 5, 12, &main_grid);
@@ -69,7 +72,7 @@ int main()
     ShapeHeader* c2 = draw_circle(32, 25, 10, &main_grid);
     ShapeHeader* c3 = draw_circle(52, 25, 10, &main_grid);
     ShapeHeader* c4 = draw_circle(72, 25, 10, &main_grid);
-
+    pthread_create(&server_thread, NULL, start_server, NULL); 
      while (1) {
         clear_screen();
         update_shapes(&main_grid);
@@ -77,6 +80,6 @@ int main()
         usleep(1000000 / FRAME_RATE); // Sleep to maintain frame rate
     }
     
-    //start_server(8080);
+    pthread_join(server_thread, NULL);
     return 0;
 }

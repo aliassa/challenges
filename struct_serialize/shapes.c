@@ -12,6 +12,34 @@ extern ShapeHeader* shapes[MAX_SHAPES];
 extern uint16_t shape_count;
 extern int shape_id;
 
+void print_color(SHAPE_TYPE type)
+{
+    if(type == BORDER)
+    {
+        printf(ANSI_COLOR_RED);
+    }
+    else if(type == LABEL)
+    {
+        printf(ANSI_COLOR_YELLOW);
+    }
+    else if(type == LINE)
+    {
+        printf(ANSI_COLOR_CYAN);
+    }
+    else if(type == SQUARE)
+    {
+        printf(ANSI_COLOR_GREEN);
+    }
+    else if(type == CIRCLE)
+    {
+        printf(ANSI_COLOR_MAGENTA);
+    }
+    else
+    {
+        printf(ANSI_COLOR_RESET);
+    }
+}
+
 
 static void reset_shape(Grid* grid, ShapeHeader* shape)
 {
@@ -91,6 +119,7 @@ ShapeHeader* draw_square(uint8_t origin_x, uint8_t origin_y, uint8_t side, Grid*
     square->header.is_head = 1;
     int label_index = index + (grid->width * side)/2;
     draw_label((ShapeHeader*) square, label_index, "-Label : Square ", grid);
+    printf("");
     return (ShapeHeader*) square;
 }
 
@@ -192,6 +221,7 @@ ShapeHeader* draw_circle(uint8_t origin_x, uint8_t origin_y, uint8_t radius, Gri
     return (ShapeHeader*)circle;
 }
 
+
 void draw_grid(Grid* grid)
 {
     for(int i = 0; i < grid->height; i++)
@@ -199,37 +229,8 @@ void draw_grid(Grid* grid)
         for(int j = 0; j < grid->width; j++)
         {
             ShapeHeader* shape = grid->grid[i * grid->width + j]; 
-            if(HIDDEN != shape->pixel)
-            {
-                if(shape->type == BORDER)
-                {
-                    printf(ANSI_COLOR_RED);
-                }
-                else if(shape->type == LABEL)
-                {
-                    printf(ANSI_COLOR_YELLOW);
-                }
-                else if(shape->type == LINE)
-                {
-                    printf(ANSI_COLOR_CYAN);
-                }
-                else if(shape->type == SQUARE)
-                {
-                    printf(ANSI_COLOR_GREEN);
-                }
-                else if(shape->type == CIRCLE)
-                {
-                    printf(ANSI_COLOR_MAGENTA);
-                }
-                else
-                {
-                    printf(ANSI_COLOR_RESET);
-                }
-                printf("%c",shape->pixel);
-
-            }
-            else
-                printf(" ");
+            print_color(shape->type);
+            printf("%c",shape->pixel);
         }
         printf("\n");
     }
@@ -303,33 +304,9 @@ void draw_shape(enum SHAPE shape, Grid* grid)
     }
 }
 
-
 void update_shapes(Grid* grid)
 {
-    ShapeHeader* sp = NULL;
-    int index = 0;
-    for(int i = 0 ; i < grid->height; i++)
-    {
-        for(int j = 0; j < grid->width ; j++)
-        {
-            ShapeHeader* shape = grid->grid[i * grid->width + j];
-            if(shape->type == CIRCLE && shape->label &&  shape->is_head)
-            {                
-                sprintf(shape->label->text, "%d  ", i);
-                printf("Circle label : %s\n", shape->label->text);
-                sp = shape;
-                index = i * grid->width + j;
-            }
-        }
-    }
-    //if(sp)
-        //draw_label(sp, index,"Bla blaa", grid);
-}
-
-/*
-void update_shapes(Grid* grid)
-{
-    static int id = -1;
+    static int id = 7;
     int current_id = -1;
     SHAPE_TYPE type = SQUARE;
 
@@ -342,6 +319,18 @@ void update_shapes(Grid* grid)
         for(int j = 0; j < grid->width ; j++)
         {
             ShapeHeader* shape = grid->grid[i * grid->width + j];
+            if(shape->is_head && shape->id != -1)
+            {
+                char tmp[3];
+                sprintf(tmp, "%d", shape->id);
+                if(strlen(tmp) == 1)
+                    shape->pixel = tmp[0];
+                else
+                {
+                    shape->pixel = tmp[0];
+                    grid->grid[i * grid->width + j + 1]->pixel = tmp[1];
+                }
+            }
             if(id == -1 && shape->type == type)
             {
                 id = shape->id;
@@ -354,5 +343,5 @@ void update_shapes(Grid* grid)
             }
         }
     }
-}*/
+}
 

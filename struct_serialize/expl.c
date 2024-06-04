@@ -1,42 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
+typedef struct Label Label;
 
-typedef struct 
+typedef struct
 {
-    int a;
-}Shape;
+    int id;
+    Label* label;
+} ShapeHeader;
 
-
-typedef struct 
+struct Label
 {
-    Shape* shape;
-    int b;
-}Line;
+    ShapeHeader header;
+    char text[16];
+};
 
 
 int main()
 {
-    Line* line = (Line*) malloc(sizeof(Line));
-    line->shape = (Shape*) malloc(sizeof(Shape));
-    line->shape->a = 1;
-    line->b = 5;
+    ShapeHeader* s = (ShapeHeader*) malloc(sizeof(ShapeHeader));
+    Label* l = (Label*) malloc((sizeof(Label)));
+    strcpy(l->text, "Original text!");
+    s->label = l;
+    strcpy(s->label->text, "Modified text!");
+    printf("%s\n", l->text);
+    return 0;
 
-
-    Shape* sp = (Shape*) malloc(sizeof(Shape));
-    sp->a = 0;
-
-    sp = (Shape*)line;
-    printf("%d\n", ((Line*)sp)->b);
-
-}
-void print_shape(Shape* s)
-{
-    printf("[SHAPE] : a=%d\n", s->a);
-}
-void print_line(Line* l)
-{
-    printf("[LINE] : b=%d ", l->b);
-    printf("Has shape : ");
-    print_shape(l->shape);
 }

@@ -24,34 +24,26 @@ const char *enum_to_string(ObjType_t Type) {
   case ROOM:
     return "ROOM";
     break;
-    break;
   case CAR:
     return "CAR";
-    break;
     break;
   case DOG:
     return "DOG";
     break;
-    break;
   case TV:
     return "TV";
-    break;
     break;
   case PERSON:
     return "PERSON";
     break;
-    break;
   case HOOD:
     return "HOOD";
-    break;
     break;
   case PARKING_LOT:
     return "PARKING_LOT";
     break;
-    break;
   default:
     return "NONE";
-    break;
     break;
   }
 }

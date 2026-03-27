@@ -15,5 +15,6 @@ int vec_set(vec_t* v, size_t idx, void* item);
 int vec_insert(vec_t* v, size_t idx, void* item);
 void* vec_delete(vec_t* v, size_t idx);
 int vec_resize(vec_t* v);
+void vec_delete_item(vec_t* v, void* item);
 typedef void (*print_func)(void*);
 void vec_print(vec_t* v, print_func p);

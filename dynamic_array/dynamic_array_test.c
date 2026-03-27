@@ -260,6 +260,19 @@ TEST(test_insert_null_vec) {
     int a = 1;
     ASSERT(vec_insert(NULL, 0, &a) == -1);
 }
+
+/* ── vec_delete_item ───────────────────────────────────────────────────────── */
+// void vec_delete_item(vec_t* v, void* item)
+TEST(test_delete_item) {
+    vec_t* v = vec_create(4);
+    int a = 10, b = 20, c = 30;
+    vec_push(v, &a);
+    vec_push(v, &b);
+    vec_push(v, &c);
+}
+
+
+
 /* ── vec_delete ───────────────────────────────────────────────────────── */
 
 TEST(test_delete_first) {

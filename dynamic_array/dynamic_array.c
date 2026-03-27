@@ -84,6 +84,25 @@ void* vec_delete(vec_t* v, size_t idx) {
     return item;
 }
 
+#include <stdio.h>
+
+void vec_delete_item(vec_t* v, void* item) {
+    
+    if(!v || !v->data) return;
+    for(size_t i = 0; i < v->length; i++) {
+        if(v->data[i] == item) {
+            // Shilft element left
+            for(size_t j = i; j < v->length - 1; j++) {
+                v->data[j] = v->data[j+1];
+            }
+            v->length--;
+
+            v->data[v->length] = NULL;
+            return;
+        }
+    }
+}
+
 int vec_resize(vec_t* v) {
     if(!v) return -1;
     size_t new_cap = v->capacity ? v->capacity * 2 : 1; // handle capacity == 0
@@ -97,7 +116,6 @@ int vec_resize(vec_t* v) {
 #include <stdio.h>
 void vec_print(vec_t* v, print_func p) {
     if(!v) return;
-    printf("vect : ");
     for(size_t i = 0; i < v->length; i++) {
         printf("[%zu] -> ", i);
         if(p) p(v->data[i]);

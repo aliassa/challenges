@@ -6,17 +6,20 @@
 #include <inttypes.h>
 #include <assert.h>
 #include <math.h>
+#include <time.h>
 
 #define MAX_NAME_LENGTH 32
-
+#define SHIP_HEALTH_MAX 1000
 size_t g_id;
 
 #define PI 3.14f
+
 typedef enum {
     CARGO_SOLDIER,
     CARGO_STAFF,
     CARGO_WEAPON,
     CARGO_FOOG,
+    CARGO_COUNT,
 } CargoType;
 
 typedef enum {
@@ -31,6 +34,9 @@ typedef enum {
     RANK_COUNT
 } Rank;
 
+static float random_float() {
+    return (float)rand() / (float)RAND_MAX;
+}
 static const char* type_to_str(Rank type) {
     switch (type)
     {
@@ -84,7 +90,9 @@ typedef struct
     uint32_t capacity;
     uint32_t count;
     uint32_t damage;
+    float accuracy; // from [0..1]
     float weight;
+    float range;
 } Weapon;
 
 typedef struct {
@@ -92,6 +100,7 @@ typedef struct {
     uint32_t id;
     uint32_t nb_onboard;
     uint32_t max_onboard;
+    uint32_t health;
     float radius;
     float max_weight;
     float total_weight;
@@ -100,8 +109,8 @@ typedef struct {
     float max_fuel;
     float consumption_per_km;
     Position position;
-    
-    vec_t* cargo; // Contains items on the chip
+
+    vec_t* cargo[CARGO_COUNT]; // Contains items on the chip
 } Ship;
 
 static void print_soldier(void* s) {
@@ -119,6 +128,7 @@ static void print_weapon(void* s) {
     printf("ID : %" PRIu32 "\n", ((Weapon*)s)->id);
     printf("Capacity : %" PRIu32 "\n", ((Weapon*)s)->capacity);
     printf("Weight : %.2f Kg\n", ((Weapon*)s)->weight);
+    printf("Range : %.2f Kg\n", ((Weapon*)s)->range);
     printf("Damage : %" PRIu32 "\n", ((Weapon*)s)->damage);
 }
 
@@ -150,7 +160,8 @@ static void print_ship(void* s) {
     printf("Radius : %.2f m\n", ((Ship*)s)->radius);
     printf("On board : %" PRIu32 "\n", ((Ship*)s)->nb_onboard);
 }
-Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage, float weight) {
+Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage,
+                                 float accuracy, float weight, float range) {
     Weapon* w = calloc(1, sizeof(*w));
     if(!w) return NULL;
 
@@ -159,6 +170,8 @@ Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage, floa
     w->capacity = capacity;
     w->damage = damage;
     w->weight = weight;
+    w->range = range;
+    w->accuracy = accuracy;
     w->id = g_id++;
     return w;
 }
@@ -177,9 +190,23 @@ Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max
     s->max_fuel = max_fuel;
     s->fuel = max_fuel;
     s->consumption_per_km = consumption_per_km;
-    s->cargo = vec_create(10);
+    s->health = SHIP_HEALTH_MAX;
+    for(int i = 0; i < CARGO_COUNT; i++)
+        s->cargo[i] = vec_create(10);
     vec_push(ships, s);
     return s;
+}
+
+void ship_destroy(vec_t* ships, Ship* s) {
+    for(size_t i = 0; i < ships->length; i++) {
+        if(ships->data[i] == s)
+            vec_delete(ships, i);
+    }
+}
+
+Weapon* shio_get_weapon(Ship* s, Weapon* w) {
+    // search in the cargo for the given weapon by id
+
 }
 
 float ship_get_max_range(const Ship* s) {
@@ -238,15 +265,50 @@ int ship_cargo_add(Ship* ship, CargoType type, void* obj, float weight) {
 
     if(type == CARGO_SOLDIER || type == CARGO_STAFF) ship->nb_onboard++;
 
-    vec_push(ship->cargo, item);
+    vec_push(ship->cargo[type], item);
 
     return 0;
 }
 
-int ship_cargo_remove(Ship* ship, void* obj) {
-    if (!ship || !ship->cargo) return -1;
+int ship_has_cargo(Ship* s, void* cargo, CargoType type) {
+    // Check if a ship has a specefic cargo
+    if(!s || !cargo) return 0;
+    assert(type >= 0 && type < CARGO_COUNT);
+    vec_t* v = s->cargo[type];
+    for(size_t i = 0; i < v->length; i++) {
+        CargoItem* item = v->data[i];
+        if(item->p == cargo) return 1;
+    }
+    return 0;
+}
 
-    vec_t* v = ship->cargo;
+static int random_hit(float accuracy) {
+    return random_float() <= accuracy ? 1 : 0;
+}
+
+int ship_fire_weapon(vec_t* ships, Ship* attacker, Ship* target, Weapon* weapon) {
+    // To add range check
+    if(!attacker || !target || !weapon || !ships) return -1;
+    if(weapon->count == 0) return -2;
+    if(!ship_has_cargo(attacker, weapon, CARGO_WEAPON)) return -3;
+    
+    weapon->count--;
+    
+    if(random_hit(weapon->accuracy)) {
+        if(target->health <= weapon->damage) {
+            ship_destroy(ships, target);
+            return 1;
+        }
+        target->health -= weapon->damage;
+    }
+    return 0;
+}
+
+int ship_cargo_remove(Ship* ship, CargoType type, void* obj) {
+    assert(type >= 0 || type < CARGO_COUNT);
+    if (!ship || !ship->cargo[type]) return -1;
+
+    vec_t* v = ship->cargo[type];
 
     for(size_t i = 0; i < v->length; i++) {
         CargoItem* item = v->data[i];
@@ -269,6 +331,9 @@ int ship_cargo_remove(Ship* ship, void* obj) {
 }
 
 int main(void) {
+    // Seed for random gen
+    srand(time(NULL));
+
     vec_t* soldiers = vec_create(10);
     vec_t* ships = vec_create(10);
     Soldier* s1 = soldier_create(soldiers, "Ali BOUZIDI", RANK_ADMIRAL, 78.5f);
@@ -277,7 +342,7 @@ int main(void) {
 
     Ship* sh1 = ship_create(ships, "OMAR IBN KHATTAB", 1024, 10000000.f, 10.f, 100.f, 100000.f);
 
-    Weapon* w1 = weapon_create("Kruz", 8, 100, 1000.f);
+    Weapon* w1 = weapon_create("Kruz", 8, 50, 0.8f, 100, 1000.f);
 
     ship_cargo_add(sh1, CARGO_SOLDIER, s1, s1->weight);
     ship_cargo_add(sh1, CARGO_SOLDIER, s2, s2->weight);
@@ -285,7 +350,8 @@ int main(void) {
     ship_cargo_add(sh1, CARGO_WEAPON, w1, w1->weight);
     
 
-    vec_print(sh1->cargo, print_cargo);
+    vec_print(sh1->cargo[CARGO_SOLDIER], print_cargo);
+    vec_print(sh1->cargo[CARGO_WEAPON], print_cargo);
     // ____________________ Clean up ________________________________
     free(s1); s1 = NULL;
     free(s2); s2 = NULL;

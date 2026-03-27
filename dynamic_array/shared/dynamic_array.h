@@ -1,3 +1,6 @@
+#ifndef DYNAMIC_ARRAY
+#define DYNAMIC_ARRAY
+
 #include <stddef.h>
 
 typedef struct {
@@ -18,3 +21,5 @@ int vec_resize(vec_t* v);
 void vec_delete_item(vec_t* v, void* item);
 typedef void (*print_func)(void*);
 void vec_print(vec_t* v, print_func p);
+
+#endif //DYNAMIC_ARRAY

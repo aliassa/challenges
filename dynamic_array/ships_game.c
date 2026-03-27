@@ -1,136 +1,42 @@
-#include "dynamic_array.h"
+#include "shared/dynamic_array.h"
+
+#include "shared/types.h"
+#include "shared/utils.h"
+
+#include "entities/ship.h"
+#include "entities/cargo_item.h"
+#include "entities/soldier.h"
+#include "entities/weapon.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <inttypes.h>
 #include <assert.h>
 #include <math.h>
 #include <time.h>
 
-#define MAX_NAME_LENGTH 32
-#define SHIP_HEALTH_MAX 1000
 size_t g_id;
 
 #define PI 3.14f
 
-typedef enum {
-    CARGO_SOLDIER,
-    CARGO_STAFF,
-    CARGO_WEAPON,
-    CARGO_FOOG,
-    CARGO_COUNT,
-} CargoType;
 
-typedef enum {
-    RANK_UNKNOWN,
-    RANK_SEAMN,
-    RANK_PETTY_OFFICER,
-    RANK_WARRANT_OFFICER,
-    RANK_LIEUTENANT,
-    RANK_COMMANDER,
-    RANK_CAPTAIN,
-    RANK_ADMIRAL,
-    RANK_COUNT
-} Rank;
-
-static float random_float() {
-    return (float)rand() / (float)RAND_MAX;
-}
-static const char* type_to_str(Rank type) {
+static const char* type_to_str(CargoType type) {
     switch (type)
     {
         case CARGO_SOLDIER: return "SOLDIER"; break;
         case CARGO_STAFF: return "STAFF"; break;
-        case CARGO_WEAPON: return "Weapon"; break;
+        case CARGO_WEAPON: return "WEAPON"; break;
+        case CARGO_FOOD: return "FOOD"; break;
         default: return "UNKNOWN"; break;
     }
 }
-
-static const char* rank_to_str(Rank rank) {
-    switch (rank)
-    {
-        case RANK_SEAMN: return "SEAMN"; break;
-        case RANK_PETTY_OFFICER: return "PETTY_OFFICER"; break;
-        case RANK_CAPTAIN: return "CAPTAIN"; break;
-        case RANK_WARRANT_OFFICER: return "WARRANT_OFFICER"; break;
-        case RANK_LIEUTENANT: return "LIEUTENANT"; break;
-        case RANK_COMMANDER: return "COMMANDER"; break;
-        case RANK_ADMIRAL: return "ADMIRAL"; break;
-        default: return "UNKNOWN"; break;
-    }
-}
-
-typedef struct {
-    float x;
-    float y;
-} Position;
-
 
 typedef struct {
     void* p; // Soldier*, Weapon*, Food*, ....
     CargoType type;
     float weight;
 } CargoItem;
-
-typedef struct
-{
-    char name[MAX_NAME_LENGTH];
-    Rank rank;
-    uint32_t id;
-    float weight;
-    uint32_t points;
-    Position position;
-} Soldier;
-
-typedef struct
-{
-    char name[MAX_NAME_LENGTH];
-    uint32_t id;
-    uint32_t capacity;
-    uint32_t count;
-    uint32_t damage;
-    float accuracy; // from [0..1]
-    float weight;
-    float range;
-} Weapon;
-
-typedef struct {
-    char name[MAX_NAME_LENGTH];
-    uint32_t id;
-    uint32_t nb_onboard;
-    uint32_t max_onboard;
-    uint32_t health;
-    float radius;
-    float max_weight;
-    float total_weight;
-
-    float fuel;
-    float max_fuel;
-    float consumption_per_km;
-    Position position;
-
-    vec_t* cargo[CARGO_COUNT]; // Contains items on the chip
-} Ship;
-
-static void print_soldier(void* s) {
-    if(!s) return;
-    printf("Soldier : %s\n", ((Soldier*)s)->name);
-    printf("ID : %" PRIu32 "\n", ((Soldier*)s)->id);
-    printf("Points : %" PRIu32 "\n", ((Soldier*)s)->points);
-    printf("Weight : %.2f Kg\n", ((Soldier*)s)->weight);
-    printf("Rank : %s\n", rank_to_str(((Soldier*)s)->rank));
-}
-
-static void print_weapon(void* s) {
-    if(!s) return;
-    printf("Weapon : %s\n", ((Weapon*)s)->name);
-    printf("ID : %" PRIu32 "\n", ((Weapon*)s)->id);
-    printf("Capacity : %" PRIu32 "\n", ((Weapon*)s)->capacity);
-    printf("Weight : %.2f Kg\n", ((Weapon*)s)->weight);
-    printf("Range : %.2f Kg\n", ((Weapon*)s)->range);
-    printf("Damage : %" PRIu32 "\n", ((Weapon*)s)->damage);
-}
 
 static void print_cargo(void* s) {
     if(!s) return;
@@ -147,94 +53,6 @@ static void print_cargo(void* s) {
     default:
         break;
     }
-}
-
-static void print_ship(void* s) {
-    if(!s) return;
-    printf("Ship : %s\n", ((Ship*)s)->name);
-    printf("ID : %" PRIu32 "\n", ((Ship*)s)->id);
-    printf("Posision : (%.2f, %.2f)\n", ((Ship*)s)->position.x, ((Ship*)s)->position.y);
-    printf("Fuel : %.2f Gallons\n", ((Ship*)s)->fuel);
-    printf("Max weight : %.2f Kg\n", ((Ship*)s)->max_weight);
-    printf("Total weight : %.2f Kg\n", ((Ship*)s)->total_weight);
-    printf("Radius : %.2f m\n", ((Ship*)s)->radius);
-    printf("On board : %" PRIu32 "\n", ((Ship*)s)->nb_onboard);
-}
-Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage,
-                                 float accuracy, float weight, float range) {
-    Weapon* w = calloc(1, sizeof(*w));
-    if(!w) return NULL;
-
-    snprintf(w->name, MAX_NAME_LENGTH, "%s", name ? name : "Unknown");
-
-    w->capacity = capacity;
-    w->damage = damage;
-    w->weight = weight;
-    w->range = range;
-    w->accuracy = accuracy;
-    w->id = g_id++;
-    return w;
-}
-
-Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max_weight, float radius,
-                             float consumption_per_km, float max_fuel) {
-    assert(consumption_per_km != 0);
-    Ship* s = calloc(1, sizeof *s);
-    if(!s) return NULL;
-    snprintf(s->name, MAX_NAME_LENGTH, "%s", name ? name : "Unknown");
-
-    s->id = g_id++;
-    s->max_onboard = max_onboard;
-    s->max_weight = max_weight;
-    s->radius = radius;
-    s->max_fuel = max_fuel;
-    s->fuel = max_fuel;
-    s->consumption_per_km = consumption_per_km;
-    s->health = SHIP_HEALTH_MAX;
-    for(int i = 0; i < CARGO_COUNT; i++)
-        s->cargo[i] = vec_create(10);
-    vec_push(ships, s);
-    return s;
-}
-
-void ship_destroy(vec_t* ships, Ship* s) {
-    for(size_t i = 0; i < ships->length; i++) {
-        if(ships->data[i] == s)
-            vec_delete(ships, i);
-    }
-}
-
-Weapon* shio_get_weapon(Ship* s, Weapon* w) {
-    // search in the cargo for the given weapon by id
-
-}
-
-float ship_get_max_range(const Ship* s) {
-    return s->fuel / s->consumption_per_km;
-}
-
-float ship_move(Ship* s, float distance, float direction_rads) {
-    if(!s) return -1.0f;
-    if (s->consumption_per_km <= 0.0f) return -1.0f;
-    // if not anaugh fuel , stop where it should (distance * s->consumption_per_km)
-    if(distance * s->consumption_per_km >= s->fuel) {
-        distance = ship_get_max_range(s);
-    }
-    // Calc new position
-    s->position.x += distance * cos(direction_rads);
-    s->position.y += distance * sin(direction_rads);
-    // calc new fuel
-    s->fuel -= distance * s->consumption_per_km;
-    if (s->fuel < 0.0f) s->fuel = 0.0f;
-    return distance;
-}
-
-
-int ship_refuel(Ship* s, float amount) {
-    if(!s) return -1;
-    if(s->fuel + amount >= s->max_fuel) s->fuel = s->max_fuel;
-    else s->fuel += amount;
-    return 0;
 }
 
 Soldier* soldier_create(vec_t* soldiers, const char* name, Rank rank, float weight) {
@@ -282,26 +100,26 @@ int ship_has_cargo(Ship* s, void* cargo, CargoType type) {
     return 0;
 }
 
-static int random_hit(float accuracy) {
+int random_hit(float accuracy) {
     return random_float() <= accuracy ? 1 : 0;
 }
 
-int ship_fire_weapon(vec_t* ships, Ship* attacker, Ship* target, Weapon* weapon) {
-    // To add range check
-    if(!attacker || !target || !weapon || !ships) return -1;
-    if(weapon->count == 0) return -2;
-    if(!ship_has_cargo(attacker, weapon, CARGO_WEAPON)) return -3;
+AttackRes ship_fire_weapon(vec_t* ships, Ship* attacker, Ship* target, Weapon* weapon) {
+    if(!attacker || !target || !weapon || !ships) return ATTACK_INVALID_INPUT;
+    if(weapon->count == 0) return ATTACK_OUT_OF_MUNITION;
+    if(!ship_has_cargo(attacker, weapon, CARGO_WEAPON)) return ATTACK_INVALID_INPUT;
+    if(distance(attacker->position, target->position) > weapon->range) return ATTACK_OUT_OF_RANGE;
     
     weapon->count--;
     
     if(random_hit(weapon->accuracy)) {
         if(target->health <= weapon->damage) {
             ship_destroy(ships, target);
-            return 1;
+            return ATTACK_DESTROYED;
         }
         target->health -= weapon->damage;
     }
-    return 0;
+    return ATTACK_DAMAGED;
 }
 
 int ship_cargo_remove(Ship* ship, CargoType type, void* obj) {

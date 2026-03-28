@@ -16,7 +16,6 @@ typedef struct
     float range;
 } Weapon;
 
-void print_weapon(void* s);
 Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage,
                                  float accuracy, float weight, float range);
 #endif // SG_WEAPON_H

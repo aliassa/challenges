@@ -2,6 +2,7 @@
 #define SG_SOLDIER_H
 
 #include "../shared/types.h"
+#include "../shared/dynamic_array.h"
 #include <stdint.h>
 
 typedef struct
@@ -14,6 +15,6 @@ typedef struct
     Position position;
 } Soldier;
 
-void print_soldier(void* s);
+Soldier* soldier_create(vec_t* soldiers, const char* name, Rank rank, float weight);
 
 #endif // SG_SOLDIER_H

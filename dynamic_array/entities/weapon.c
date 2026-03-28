@@ -6,16 +6,6 @@
 
 extern size_t g_id;
 
-void print_weapon(void* s) {
-    if(!s) return;
-    printf("Weapon : %s\n", ((Weapon*)s)->name);
-    printf("ID : %" PRIu32 "\n", ((Weapon*)s)->id);
-    printf("Capacity : %" PRIu32 "\n", ((Weapon*)s)->capacity);
-    printf("Weight : %.2f Kg\n", ((Weapon*)s)->weight);
-    printf("Range : %.2f Kg\n", ((Weapon*)s)->range);
-    printf("Damage : %" PRIu32 "\n", ((Weapon*)s)->damage);
-}
-
 Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage,
                                  float accuracy, float weight, float range) {
     Weapon* w = calloc(1, sizeof(*w));

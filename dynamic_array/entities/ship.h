@@ -25,11 +25,13 @@ typedef struct {
     vec_t* cargo[CARGO_COUNT]; // Contains items on the chip
 } Ship;
 
-void print_ship(void* s);
 void ship_destroy(vec_t* ships, Ship* s);
 float ship_get_max_range(const Ship* s);
 float ship_move(Ship* s, float distance, float direction_rads);
 int ship_refuel(Ship* s, float amount);
 Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max_weight, float radius,
                              float consumption_per_km, float max_fuel);
+int ship_has_cargo(Ship* s, void* cargo, CargoType type);
+int ship_cargo_add(Ship* ship, CargoType type, void* obj, float weight);
+int ship_cargo_remove(Ship* ship, CargoType type, void* obj);
 #endif // SG_SHUP_H

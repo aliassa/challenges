@@ -2,25 +2,15 @@
 #define SG_SHIP_H
 
 #include "ship.h"
+#include "../entities/cargo_item.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 extern size_t g_id;
-
-void print_ship(void* s) {
-    if(!s) return;
-    printf("Ship : %s\n", ((Ship*)s)->name);
-    printf("ID : %" PRIu32 "\n", ((Ship*)s)->id);
-    printf("Posision : (%.2f, %.2f)\n", ((Ship*)s)->position.x, ((Ship*)s)->position.y);
-    printf("Fuel : %.2f Gallons\n", ((Ship*)s)->fuel);
-    printf("Max weight : %.2f Kg\n", ((Ship*)s)->max_weight);
-    printf("Total weight : %.2f Kg\n", ((Ship*)s)->total_weight);
-    printf("Radius : %.2f m\n", ((Ship*)s)->radius);
-    printf("On board : %" PRIu32 "\n", ((Ship*)s)->nb_onboard);
-}
 
 Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max_weight, float radius,
                              float consumption_per_km, float max_fuel) {
@@ -41,6 +31,18 @@ Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max
         s->cargo[i] = vec_create(10);
     vec_push(ships, s);
     return s;
+}
+
+int ship_has_cargo(Ship* s, void* cargo, CargoType type) {
+    // Check if a ship has a specefic cargo
+    if(!s || !cargo) return 0;
+    assert(type >= 0 && type < CARGO_COUNT);
+    vec_t* v = s->cargo[type];
+    for(size_t i = 0; i < v->length; i++) {
+        CargoItem* item = v->data[i];
+        if(item->p == cargo) return 1;
+    }
+    return 0;
 }
 
 void ship_destroy(vec_t* ships, Ship* s) {
@@ -70,6 +72,51 @@ float ship_move(Ship* s, float distance, float direction_rads) {
     return distance;
 }
 
+int ship_cargo_remove(Ship* ship, CargoType type, void* obj) {
+    assert(type >= 0 || type < CARGO_COUNT);
+    if (!ship || !ship->cargo[type]) return -1;
+
+    vec_t* v = ship->cargo[type];
+
+    for(size_t i = 0; i < v->length; i++) {
+        CargoItem* item = v->data[i];
+        if(item->p == obj) {
+            ship->total_weight -= item->weight;
+
+            if(item->type == CARGO_SOLDIER || item->type == CARGO_STAFF)
+                ship->nb_onboard--;
+
+            free(item);
+
+            memmove(&v->data[i], &v->data[i+1], (v->length -i - 1) * sizeof (void*));
+            v->length--;
+            v->data[v->length] = NULL;
+
+            return 0;
+        }
+    }
+    return -2;
+}
+
+int ship_cargo_add(Ship* ship, CargoType type, void* obj, float weight) {
+    if (!ship) return -1;
+
+    if(ship->total_weight + weight > ship->max_weight)  return -2;
+    if(ship->nb_onboard  == ship->max_onboard)  return -3;
+    CargoItem* item = malloc(sizeof *item);
+    if(!item) return -4;
+    
+    ship->total_weight += weight;
+    item->type = type;
+    item->p = obj;
+    item->weight = weight;
+
+    if(type == CARGO_SOLDIER || type == CARGO_STAFF) ship->nb_onboard++;
+
+    vec_push(ship->cargo[type], item);
+
+    return 0;
+}
 
 int ship_refuel(Ship* s, float amount) {
     if(!s) return -1;

@@ -2,6 +2,7 @@
 #define SG_TYPES_H
 
 #define MAX_NAME_LENGTH 32
+#define PI 3.14f
 
 typedef enum {
     ATTACK_DESTROYED,

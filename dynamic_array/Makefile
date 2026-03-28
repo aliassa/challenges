@@ -8,11 +8,28 @@ SRCS    = ships_game.c \
           cargo.c      \
           combat.c     \
           debug.c      \
+		  command.c      \
+		  game_loop.c    \
           entities/ship.c     \
           entities/soldier.c  \
           entities/weapon.c   \
           shared/utils.c
 
+TEST_SRCS = tests/test_entities.c    \
+            entities/ship.c          \
+            entities/soldier.c       \
+            entities/weapon.c        \
+            shared/utils.c
+
+TEST_OBJS = $(patsubst %.c, $(BUILD)/%.o, $(TEST_SRCS))
+
+$(BUILD)/test_entities: $(TEST_OBJS) $(LIB)
+	$(CC) $(CFLAGS) $^ -L$(BUILD) -ldynarray -lm -o $@
+
+test: $(BUILD)/test_entities
+	./$(BUILD)/test_entities
+
+.PHONY: all clean rebuild test
 # Mirror .c -> .o but place all objects under build/
 OBJS    = $(patsubst %.c, $(BUILD)/%.o, $(SRCS))
 

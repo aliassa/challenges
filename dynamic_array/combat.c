@@ -1,5 +1,6 @@
 #include "combat.h"
 #include "shared/utils.h"
+#include <stdio.h>
 
 static int random_hit(float accuracy) {
     return random_float() <= accuracy ? 1 : 0;
@@ -20,5 +21,33 @@ AttackRes ship_fire_weapon(GameState* gs, Ship* attacker, Ship* target, Weapon* 
         }
         target->health -= weapon->damage;
     }
+    else return ATTACK_MISSED;
     return ATTACK_DAMAGED;
+}
+
+void print_attack_result(AttackRes res) {
+    switch (res)
+    {
+    case ATTACK_INVALID_INPUT:
+        printf("Attack : %s\n", "ATTACK_INVALID_INPUT");
+        break;
+    case ATTACK_OUT_OF_MUNITION:
+        printf("Attack : %s\n", "ATTACK_OUT_OF_MUNITION");
+        break;
+    case ATTACK_OUT_OF_RANGE:
+        printf("Attack : %s\n", "ATTACK_OUT_OF_RANGE");
+        break;
+    case ATTACK_DESTROYED:
+        printf("Attack : %s\n", "ATTACK_DESTROYED");
+        break;
+    case ATTACK_DAMAGED:
+        printf("Attack : %s\n", "ATTACK_DAMAGED");
+        break;
+    case ATTACK_MISSED:
+        printf("Attack : %s\n", "ATTACK_MISSED");
+        break;
+    default:
+        printf("Attack : UNSUPPORTED ATTACK_RES\n");
+        break;
+    }
 }

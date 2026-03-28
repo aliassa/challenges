@@ -12,7 +12,7 @@
 
 extern size_t g_id;
 
-Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max_weight, float radius,
+Ship* ship_create(GameState* gs,const char* name, uint32_t max_onboard, float max_weight, float radius,
                              float consumption_per_km, float max_fuel) {
     assert(consumption_per_km != 0);
     Ship* s = calloc(1, sizeof *s);
@@ -29,7 +29,7 @@ Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max
     s->health = SHIP_HEALTH_MAX;
     for(int i = 0; i < CARGO_COUNT; i++)
         s->cargo[i] = vec_create(10);
-    vec_push(ships, s);
+    vec_push(gs->ships, s);
     return s;
 }
 

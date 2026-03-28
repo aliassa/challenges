@@ -6,6 +6,7 @@
 #include "entities/weapon.h"
 
 AttackRes ship_fire_weapon(GameState* gs, Ship* attacker, Ship* target, Weapon* weapon);
+void print_attack_result(AttackRes res);
 
 #endif // SG_COMBAT_H
 

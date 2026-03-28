@@ -9,6 +9,7 @@ typedef enum {
     ATTACK_DAMAGED,
     ATTACK_OUT_OF_RANGE,
     ATTACK_OUT_OF_MUNITION,
+    ATTACK_MISSED,
     ATTACK_INVALID_INPUT
 } AttackRes;
 

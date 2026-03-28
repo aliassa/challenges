@@ -35,6 +35,12 @@ void print_soldier(const Soldier* s) {
     printf("Rank : %s\n", rank_to_str(s->rank));
 }
 
+void print_soldier_status(const Soldier* s) {
+    if(!s) return;
+    printf("Soldier : %s ", s->name);
+    printf("Points : %" PRIu32 "\n", s->points);
+}
+
 void print_weapon(const Weapon* w) {
     if(!w) return;
     printf("Weapon : %s\n", w->name);
@@ -57,6 +63,15 @@ void print_ship(const Ship* s) {
     printf("On board : %" PRIu32 "\n", s->nb_onboard);
 }
 
+void print_ship_status(const Ship* s) {
+    if(!s) return;
+    printf("Ship : %s|", s->name);
+    printf("ID : %" PRIu32 "|", s->id);
+    printf("Fuel : %.2f Gallons|", s->fuel);
+    printf("Health : %" PRIu32 "|", s->health);
+    printf("Posision : (%.2f, %.2f)\n", s->position.x, s->position.y);
+}
+
 void print_cargo(const CargoItem* item) {
     if(!item) return;
     printf("Cargo\n");
@@ -74,6 +89,16 @@ void print_cargo(const CargoItem* item) {
     }
 }
 void print_soldier_cb(void* p) { print_soldier((const Soldier*)p); }
+void print_soldier_status_cb(void* p) { print_soldier_status((const Soldier*)p); }
 void print_weapon_cb(void* p) { print_weapon((const Weapon*)p); }
 void print_ship_cb(void* p) { print_ship((const Ship*)p); }
+void print_ship_status_cb(void* p) { print_ship_status((const Ship*)p); }
 void print_cargo_cb(void* p) { print_cargo((const CargoItem*)p); }
+
+void print_status(GameState* gs) {
+    printf("Game status :\n");
+    printf("Nb Ships : %zu\n", gs->ships->length);
+    vec_print(gs->ships, print_ship_status_cb);
+    printf("Nb Soldiers : %zu\n", gs->soldiers->length);
+    vec_print(gs->soldiers, print_soldier_status_cb);
+}

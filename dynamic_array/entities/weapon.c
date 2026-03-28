@@ -17,6 +17,7 @@ Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage,
     w->damage = damage;
     w->weight = weight;
     w->range = range;
+    w->count = capacity;
     w->accuracy = accuracy;
     w->id = g_id++;
     return w;

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "../shared/types.h"
 #include "../shared/dynamic_array.h"
+#include "game_state.h"
 
 #define SHIP_HEALTH_MAX 1000
 
@@ -29,7 +30,7 @@ void ship_destroy(vec_t* ships, Ship* s);
 float ship_get_max_range(const Ship* s);
 float ship_move(Ship* s, float distance, float direction_rads);
 int ship_refuel(Ship* s, float amount);
-Ship* ship_create(vec_t* ships,const char* name, uint32_t max_onboard, float max_weight, float radius,
+Ship* ship_create(GameState* gs,const char* name, uint32_t max_onboard, float max_weight, float radius,
                              float consumption_per_km, float max_fuel);
 int ship_has_cargo(Ship* s, void* cargo, CargoType type);
 int ship_cargo_add(Ship* ship, CargoType type, void* obj, float weight);

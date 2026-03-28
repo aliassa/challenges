@@ -17,5 +17,6 @@ void print_soldier_cb(void* p);
 void print_weapon_cb(void* p);
 void print_ship_cb(void* p);
 void print_cargo_cb(void* p);
+void print_status(GameState* gs);
 
 #endif

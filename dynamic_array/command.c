@@ -72,41 +72,62 @@ Command parse_command(const char* input) {
     return ret;
 }
 
+// ─── Handlers ───────────────────────────────────────────────────
+
+static void handle_move(GameState* gs, const Command* cmd) {
+    Ship* s = vec_get(gs->ships, cmd->ship_id);
+    if (!s) { printf("Invalid ship id\n"); return; }
+    ship_move(s, cmd->args.move.distance, cmd->args.move.direction);
+}
+
+static void handle_fire(GameState* gs, const Command* cmd) {
+    Ship* attacker = vec_get(gs->ships, cmd->args.fire.attacker_id);
+    Ship* target   = vec_get(gs->ships, cmd->args.fire.target_id);
+    if (!attacker || !target) { printf("Invalid ship id\n"); return; }
+
+    CargoItem* ci = vec_get(attacker->cargo[CARGO_WEAPON], cmd->args.fire.weapon_id);
+    if (!ci || !ci->p) { printf("Invalid weapon id\n"); return; }
+
+    print_attack_result(ship_fire_weapon(gs, attacker, target, ci->p));
+}
+
+static void handle_refuel(GameState* gs, const Command* cmd) {
+    Ship* s = vec_get(gs->ships, cmd->ship_id);
+    if (!s) { printf("Invalid ship id\n"); return; }
+    ship_refuel(s, cmd->args.refuel.amount);
+}
+
+static void handle_go_to(GameState* gs, const Command* cmd) {
+    Ship* s      = vec_get(gs->ships, cmd->ship_id);
+    Ship* target = vec_get(gs->ships, cmd->args.go_to_ship.target_id);
+    if (!s || !target) { printf("Invalid ship id\n"); return; }
+    ship_approach_other(s, target, cmd->args.go_to_ship.distance);
+}
+
+static void handle_recharge(GameState* gs, const Command* cmd) {
+    Ship* s = vec_get(gs->ships, cmd->ship_id);
+    if (!s) { printf("Invalid ship id\n"); return; }
+
+    CargoItem* ci = vec_get(s->cargo[CARGO_WEAPON], cmd->args.recharge.weapon_id);
+    if (!ci || !ci->p) { printf("Invalid weapon id\n"); return; }
+
+    weapon_recharge_munition(ci->p);
+}
+
+// ─── Dispatcher ─────────────────────────────────────────────────
+
 void execute_command(GameState* gs, const Command* cmd) {
-    if(cmd->ship_id >= gs->ships->length) return;
-    Ship* s = gs->ships->data[cmd->ship_id];
+    if (!gs || !cmd) return;
+
     switch (cmd->type) {
-        case CMD_MOVE:
-            ship_move(s, cmd->args.move.distance, cmd->args.move.direction);
-            break;
-        case CMD_FIRE:
-            Ship* attacker = vec_get(gs->ships, cmd->args.fire.attacker_id);
-            Ship* target = vec_get(gs->ships, cmd->args.fire.target_id);
-            CargoItem* ci = vec_get(attacker->cargo[CARGO_WEAPON], cmd->args.fire.weapon_id);
-            Weapon* weapon = ci->p;
-            if(!attacker || !target || !weapon) return;
-            print_attack_result(ship_fire_weapon(gs, attacker, target, weapon));
-            break;
-        case CMD_REFUEL:
-            ship_refuel(s, cmd->args.refuel.amount);
-            break;
-        case CMD_STATUS:
-            print_status(gs);
-            break;
-        case CMD_HELP:
-            print_help();
-            break;
-        case CMD_GO_TO:
-            Ship* t = vec_get(gs->ships, cmd->args.go_to_ship.target_id);
-            ship_approach_other(s, t, cmd->args.go_to_ship.distance);
-            break;
-        case CMD_WEAPON_RECHAGE:
-            Ship* s_recharge = vec_get(gs->ships, cmd->ship_id);
-            CargoItem* ci_recharge = vec_get(s_recharge->cargo[CARGO_WEAPON], cmd->args.recharge.weapon_id);
-            Weapon* w_recharge = ci_recharge->p;
-            weapon_recharge_munition(w_recharge);
-            break;
-        case CMD_QUIT:    break;
+        case CMD_MOVE:           handle_move(gs, cmd);     break;
+        case CMD_FIRE:           handle_fire(gs, cmd);     break;
+        case CMD_REFUEL:         handle_refuel(gs, cmd);   break;
+        case CMD_GO_TO:          handle_go_to(gs, cmd);    break;
+        case CMD_WEAPON_RECHAGE: handle_recharge(gs, cmd); break;
+        case CMD_STATUS:         print_status(gs);         break;
+        case CMD_HELP:           print_help();             break;
+        case CMD_QUIT:                                      break;
         case CMD_UNKNOWN:
             printf("Unknown command. Type 'help' for a list of commands.\n");
             break;

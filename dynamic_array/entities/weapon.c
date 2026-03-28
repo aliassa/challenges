@@ -22,3 +22,7 @@ Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage,
     w->id = g_id++;
     return w;
 }
+
+void weapon_recharge_munition(Weapon* w) {
+    w->count = w->capacity;
+}

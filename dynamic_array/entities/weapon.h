@@ -18,4 +18,5 @@ typedef struct
 
 Weapon* weapon_create(const char* name, uint32_t capacity, uint32_t damage,
                                  float accuracy, float weight, float range);
+void weapon_recharge_munition(Weapon* w);
 #endif // SG_WEAPON_H

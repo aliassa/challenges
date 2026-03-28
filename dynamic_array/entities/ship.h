@@ -35,4 +35,6 @@ Ship* ship_create(GameState* gs,const char* name, uint32_t max_onboard, float ma
 int ship_has_cargo(Ship* s, void* cargo, CargoType type);
 int ship_cargo_add(Ship* ship, CargoType type, void* obj, float weight);
 int ship_cargo_remove(Ship* ship, CargoType type, void* obj);
+float ship_approach_other(Ship* s1, Ship* s2, float distance);
+float ship_go_to_point(Ship* s, Position p, float distance_before);
 #endif // SG_SHUP_H

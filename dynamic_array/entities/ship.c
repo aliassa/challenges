@@ -72,6 +72,29 @@ float ship_move(Ship* s, float distance, float direction_rads) {
     return distance;
 }
 
+// we can either go to point (distance_before = 0) or
+// head to thet point and keep a distance distance_before.
+float ship_go_to_point(Ship* s, Position p, float distance_before) {
+    // Calculate angle and distance
+    float dx = p.x - s->position.x;
+    float dy = p.y - s->position.y;
+    float distance = hypotf(dx, dy);
+    if(distance_before >= distance)
+        return 0.0f;
+
+    float direction_rad = atan2f(dy, dx);
+    // Normalize
+    if (direction_rad < 0) {
+        direction_rad += 2.0f * PI;
+    }
+    float move_distance = distance - distance_before;
+    return ship_move(s, move_distance, direction_rad);
+}
+
+float ship_approach_other(Ship* s1, Ship* s2, float distance) {
+    return ship_go_to_point(s1, s2->position, distance);
+}
+
 int ship_cargo_remove(Ship* ship, CargoType type, void* obj) {
     assert(type >= 0 || type < CARGO_COUNT);
     if (!ship || !ship->cargo[type]) return -1;

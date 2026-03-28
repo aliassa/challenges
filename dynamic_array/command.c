@@ -50,6 +50,21 @@ Command parse_command(const char* input) {
             ret.args.refuel.amount  = f1;
         }
     }
+    else if (strcmp(cmd, "goto") == 0) {
+        if (sscanf(rest, "%zu %zu %f", &d0, &d1, &f1) == 3) {
+            ret.type                = CMD_GO_TO;
+            ret.ship_id            = d0;
+            ret.args.go_to_ship.target_id = d1;
+            ret.args.go_to_ship.distance = f1;
+        }
+    }
+    else if (strcmp(cmd, "recharge") == 0) {
+        if (sscanf(rest, "%zu %zu", &d0, &d1) == 2) {
+            ret.type                = CMD_WEAPON_RECHAGE;
+            ret.ship_id            = d0;
+            ret.args.recharge.weapon_id = d1;
+        }
+    }
     else if (strcmp(cmd, "status") == 0) ret.type = CMD_STATUS;
     else if (strcmp(cmd, "quit")   == 0) ret.type = CMD_QUIT;
     else if (strcmp(cmd, "help")   == 0) ret.type = CMD_HELP;
@@ -59,27 +74,38 @@ Command parse_command(const char* input) {
 
 void execute_command(GameState* gs, const Command* cmd) {
     if(cmd->ship_id >= gs->ships->length) return;
+    Ship* s = gs->ships->data[cmd->ship_id];
     switch (cmd->type) {
         case CMD_MOVE:
-            ship_move(gs->ships->data[cmd->ship_id], cmd->args.move.distance, cmd->args.move.direction);
+            ship_move(s, cmd->args.move.distance, cmd->args.move.direction);
             break;
         case CMD_FIRE:
             Ship* attacker = vec_get(gs->ships, cmd->args.fire.attacker_id);
             Ship* target = vec_get(gs->ships, cmd->args.fire.target_id);
             CargoItem* ci = vec_get(attacker->cargo[CARGO_WEAPON], cmd->args.fire.weapon_id);
             Weapon* weapon = ci->p;
-            if(!attacker || !target || !weapon) printf("NULL!!!\n");
+            if(!attacker || !target || !weapon) return;
             print_attack_result(ship_fire_weapon(gs, attacker, target, weapon));
             break;
         case CMD_REFUEL:
-            ship_refuel(gs->ships->data[cmd->ship_id], cmd->args.refuel.amount);
+            ship_refuel(s, cmd->args.refuel.amount);
             break;
         case CMD_STATUS:
             print_status(gs);
             break;
         case CMD_HELP:
             print_help();
-            ;break;
+            break;
+        case CMD_GO_TO:
+            Ship* t = vec_get(gs->ships, cmd->args.go_to_ship.target_id);
+            ship_approach_other(s, t, cmd->args.go_to_ship.distance);
+            break;
+        case CMD_WEAPON_RECHAGE:
+            Ship* s_recharge = vec_get(gs->ships, cmd->ship_id);
+            CargoItem* ci_recharge = vec_get(s_recharge->cargo[CARGO_WEAPON], cmd->args.recharge.weapon_id);
+            Weapon* w_recharge = ci_recharge->p;
+            weapon_recharge_munition(w_recharge);
+            break;
         case CMD_QUIT:    break;
         case CMD_UNKNOWN:
             printf("Unknown command. Type 'help' for a list of commands.\n");
